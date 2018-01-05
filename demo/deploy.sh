@@ -1,10 +1,12 @@
 #!/bin/bash
 
+mvn -DskipTests=true clean package
+
 ## REFERENCES
 ## https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https-example-configure-event-source.html
 ## https://docs.aws.amazon.com/cli/latest/reference/lambda/index.html
 
-METHOD=POST
+METHOD=GET
 JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
 FUNCTION_NAME=hw
@@ -20,8 +22,10 @@ aws lambda list-functions --region $REGION | jq -r '.Functions[].FunctionName' |
 FUNCTION_ARN=$(
     aws lambda create-function \
         --region ${REGION} \
+        --timeout 300 \
         --function-name ${FUNCTION_NAME} \
         --zip-file fileb://${JAR_NAME} \
+        --memory-size 512 \
         --role  ${FUNCTION_ROLE} \
         --handler ${HANDLER_NAME}  \
         --runtime java8 |  jq -r '.FunctionArn'

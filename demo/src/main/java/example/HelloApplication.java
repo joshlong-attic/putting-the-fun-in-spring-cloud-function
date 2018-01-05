@@ -1,7 +1,8 @@
 package example;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,11 @@ import java.util.function.Function;
 public class HelloApplication {
 
 	@Bean
-	public Function<Void, String> hello() {
-		return value ->  ("Hello world");
+	public Function<In, Out> function () {
+		return incoming -> {
+			System.out.println("INCOMING: " + incoming.getIncoming());
+			return new Out(incoming.getIncoming().toUpperCase());
+		};
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -21,10 +25,17 @@ public class HelloApplication {
 	}
 }
 
-/*
 @Data
-@RequiredArgsConstructor
-class HelloResponse {
+@NoArgsConstructor
+@AllArgsConstructor
+class In {
 
-	private final String message;
-}*/
+	private String incoming;
+}
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class Out {
+	private String outgoing;
+}
