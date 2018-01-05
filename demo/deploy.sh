@@ -13,14 +13,18 @@ REGION=us-east-1
 REST_API_NAME=${FUNCTION_NAME}-apigateway
 FUNCTION_ROLE=arn:aws:iam::${AWS_ACCOUNT_ID}:role/lambda-role
 
-aws lambda create-function \
-    --region ${REGION} \
-    --function-name ${FUNCTION_NAME} \
-    --zip-file fileb://${JAR_NAME} \
-    --role  ${FUNCTION_ROLE} \
-    --handler example.HelloHandler \
-    --runtime java8
+## todo update this to inspect that the function is currently deployed and, if deployed, to update instead of create a function
+aws lambda delete-function --function-name $FUNCTION_NAME --region $REGION || echo "No function named ${FUNCTION_NAME} to delete."
 
+FUNCTION_ARN=$(
+    aws lambda create-function \
+        --region ${REGION} \
+        --function-name ${FUNCTION_NAME} \
+        --zip-file fileb://${JAR_NAME} \
+        --role  ${FUNCTION_ROLE} \
+        --handler ${HANDLER_NAME}  \
+        --runtime java8 |  jq -r '.FunctionArn'
+)
 
 # 3.0 create the API gateway itself.
 
