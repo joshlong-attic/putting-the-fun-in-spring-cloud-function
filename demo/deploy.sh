@@ -63,22 +63,22 @@ aws apigateway put-integration \
 aws apigateway put-method-response \
     --rest-api-id ${REST_API_ID} \
     --resource-id ${RESOURCE_ID} \
-    --http-method $METHOD \
-    --region $REGION \
+    --http-method ${METHOD} \
+    --region ${REGION} \
     --status-code 200 \
     --response-models "{\"application/json\": \"Empty\"}"
 
 aws apigateway put-integration-response \
     --rest-api-id ${REST_API_ID} \
     --resource-id ${RESOURCE_ID} \
-    --http-method $METHOD \
-    --region $REGION \
+    --http-method ${METHOD} \
+    --region ${REGION} \
     --status-code 200 \
     --response-templates "{\"application/json\": \"\"}"
 
 
 # 3.5 deploy the API
-aws apigateway create-deployment --rest-api-id ${REST_API_ID} --stage-name prod --region $REGION
+aws apigateway create-deployment --rest-api-id ${REST_API_ID} --stage-name prod --region ${REGION}
 
 # 3.6 grant permissions
 
@@ -87,7 +87,7 @@ aws lambda add-permission \
     --statement-id ${REST_API_NAME}-dev  \
     --action lambda:InvokeFunction \
     --principal apigateway.amazonaws.com \
-    --region $REGION \
+    --region ${REGION} \
     --source-arn "arn:aws:execute-api:${REGION}:${AWS_ACCOUNT_ID}:${REST_API_ID}/*/${METHOD}/${ENDPOINT_PATH_PART}"
 
 aws lambda add-permission \
@@ -95,7 +95,7 @@ aws lambda add-permission \
     --statement-id ${REST_API_NAME}-prod  \
     --action lambda:InvokeFunction \
     --principal apigateway.amazonaws.com \
-    --region $REGION \
+    --region ${REGION} \
     --source-arn "arn:aws:execute-api:${REGION}:${AWS_ACCOUNT_ID}:${REST_API_ID}/*/${METHOD}/${ENDPOINT_PATH_PART}"
 
 
