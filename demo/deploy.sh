@@ -10,9 +10,16 @@ HANDLER_NAME=example.HelloHandler
 FUNCTION_NAME=hw
 ENDPOINT_PATH_PART=${FUNCTION_NAME}
 REGION=us-east-1
-
-
 REST_API_NAME=${FUNCTION_NAME}-apigateway
+FUNCTION_ROLE=arn:aws:iam::${AWS_ACCOUNT_ID}:role/lambda-role
+
+aws lambda create-function \
+    --region ${REGION} \
+    --function-name ${FUNCTION_NAME} \
+    --zip-file fileb://${JAR_NAME} \
+    --role  ${FUNCTION_ROLE} \
+    --handler example.HelloHandler \
+    --runtime java8
 
 
 # 3.0 create the API gateway itself.
@@ -42,7 +49,6 @@ aws apigateway put-method --rest-api-id ${API_ID} --resource-id ${RESOURCE_ID} -
 
 INTEGRATION_METHOD=GET
 INTEGRATION_URI=arn:aws:apigateway:${REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${REGION}:${AWS_ACCOUNT_ID}:function:${FUNCTION_NAME}/invocations
-
 
 aws apigateway put-integration \
     --rest-api-id ${API_ID} \
