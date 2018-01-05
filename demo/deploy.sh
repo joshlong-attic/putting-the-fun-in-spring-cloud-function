@@ -17,13 +17,13 @@ REST_API_NAME=${FUNCTION_NAME}-apigateway
 
 # 3.0 create the API gateway itself.
 
-API_ID=` aws apigateway create-rest-api --name ${REST_API_NAME} --region ${REGION}  `
+API_ID=$( aws apigateway create-rest-api --name ${REST_API_NAME} --region ${REGION} )
 API_ID=$( echo $API_ID | jq -r '.id' )
 
 
 # 3.1 Now we're defining the surface of the API gateway. Create the root resource.
 
-RESOURCE_ROOT_ID=`aws apigateway get-resources --rest-api-id $API_ID  `
+RESOURCE_ROOT_ID=$( aws apigateway get-resources --rest-api-id $API_ID  )
 RESOURCE_ROOT_ID=$( echo ${RESOURCE_ROOT_ID} | jq -r '.items[].id'   )
 
 
