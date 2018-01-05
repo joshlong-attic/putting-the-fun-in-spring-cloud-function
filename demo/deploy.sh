@@ -5,7 +5,7 @@
 ## https://docs.aws.amazon.com/cli/latest/reference/lambda/index.html
 
 
-JAR_NAME=`pwd`/demo/target/hello.jar
+JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
 FUNCTION_NAME=hw
 ENDPOINT_PATH_PART=${FUNCTION_NAME}
