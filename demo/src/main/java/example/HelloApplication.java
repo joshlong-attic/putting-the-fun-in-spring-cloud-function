@@ -12,8 +12,8 @@ import java.util.function.Function;
 public class HelloApplication {
 
 	@Bean
-	public Function<String, HelloResponse> hello() {
-		return value -> new HelloResponse("Hello world");
+	public Function<Void, String> hello() {
+		return value ->  ("Hello world");
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -21,9 +21,10 @@ public class HelloApplication {
 	}
 }
 
+/*
 @Data
 @RequiredArgsConstructor
 class HelloResponse {
 
 	private final String message;
-}
+}*/

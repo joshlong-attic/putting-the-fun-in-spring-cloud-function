@@ -5,5 +5,5 @@ import org.springframework.cloud.function.adapter.aws.SpringBootRequestHandler;
 /**
  * Look ma! No AWS! (or much anything else, really.)
  */
-public class HelloHandler extends SpringBootRequestHandler<String, String> {
+public class HelloHandler extends SpringBootRequestHandler<Void, String> {
 }

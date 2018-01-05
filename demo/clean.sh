@@ -7,7 +7,6 @@ aws lambda list-functions --region $REGION | jq -r '.Functions[].FunctionName' |
 done
 
 
-
 aws apigateway get-rest-apis --region $REGION | jq -r '.items[].id' | while read l ; do
     RID=$l
     aws apigateway delete-rest-api --region $REGION --rest-api-id $RID || echo "can't delete $RID ";

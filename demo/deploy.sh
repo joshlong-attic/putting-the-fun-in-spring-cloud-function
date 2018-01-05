@@ -4,7 +4,7 @@
 ## https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https-example-configure-event-source.html
 ## https://docs.aws.amazon.com/cli/latest/reference/lambda/index.html
 
-
+METHOD=POST
 JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
 FUNCTION_NAME=hw
@@ -14,7 +14,8 @@ REST_API_NAME=${FUNCTION_NAME}-apigateway
 FUNCTION_ROLE=arn:aws:iam::${AWS_ACCOUNT_ID}:role/lambda-role
 
 ## todo update this to inspect that the function is currently deployed and, if deployed, to update instead of create a function
-aws lambda delete-function --function-name $FUNCTION_NAME --region $REGION || echo "No function named ${FUNCTION_NAME} to delete."
+aws lambda list-functions --region $REGION | jq -r '.Functions[].FunctionName' | grep $FUNCTION_NAME &&  \
+     aws lambda delete-function --function-name $FUNCTION_NAME --region $REGION ;
 
 FUNCTION_ARN=$(
     aws lambda create-function \
@@ -26,7 +27,17 @@ FUNCTION_ARN=$(
         --runtime java8 |  jq -r '.FunctionArn'
 )
 
+
 # 3.0 create the API gateway itself.
+
+## cleanup
+existing_rest_apis=`aws apigateway get-rest-apis --region $REGION `
+echo $existing_rest_apis  | grep $REST_API_NAME && $(
+    aws apigateway get-rest-apis --region $REGION | jq -r '.items[].id' | while read RID ; do
+     aws apigateway delete-rest-api --region $REGION --rest-api-id $RID || echo "can't delete $RID ";
+    done
+)
+
 
 REST_API_ID=$( aws apigateway create-rest-api --name ${REST_API_NAME} --region ${REGION} )
 REST_API_ID=$( echo $REST_API_ID | jq -r '.id' )
@@ -46,12 +57,12 @@ RESOURCE_ID=$( echo ${RESOURCE_ID} |  jq -r '.id' )
 
 # 3.3 Add the method GET to the resource.
 
-aws apigateway put-method --rest-api-id ${REST_API_ID} --resource-id ${RESOURCE_ID} --http-method GET --authorization-type NONE --region ${REGION}
+aws apigateway put-method --rest-api-id ${REST_API_ID} --resource-id ${RESOURCE_ID} --http-method $METHOD --authorization-type NONE --region ${REGION}
 
 
 # 3.4 set the lambda function as the destination for the POST method
 
-METHOD=GET
+
 INTEGRATION_URI=arn:aws:apigateway:${REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${REGION}:${AWS_ACCOUNT_ID}:function:${FUNCTION_NAME}/invocations
 
 aws apigateway put-integration \
