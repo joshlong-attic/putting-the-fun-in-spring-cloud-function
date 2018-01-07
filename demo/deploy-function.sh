@@ -5,11 +5,10 @@ mvn -DskipTests=true clean package
 ## REFERENCES
 ## https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-custom-integrations.html
 
-
+FUNCTION_NAME=d5  # ${RANDOM}
 METHOD=ANY
 JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
-FUNCTION_NAME=d4  # ${RANDOM}
 ENDPOINT_PATH_PART=${FUNCTION_NAME}
 REGION=us-east-1
 REST_API_NAME=${FUNCTION_NAME}-apigateway
@@ -51,7 +50,7 @@ aws apigateway put-integration \
     --type AWS \
     --integration-http-method POST \
     --uri ${INTEGRATION_URI} \
-    --request-templates file:///home/jlong/code/putting-the-fun-in-spring-cloud-function/demo/request-template.json \
+    --request-templates file://`pwd`/request-template.json \
     --credentials $ROLE_ID
 
 aws apigateway put-integration-response \
