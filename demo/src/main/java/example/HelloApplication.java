@@ -15,7 +15,7 @@ import java.util.function.Function;
 public class HelloApplication {
 
 	@Bean
-	public Function<In, Out> function() {
+	Function<In, Out> function() {
 		return incoming -> {
 			log.info("incoming request payload: " + incoming.getIncoming());
 			Out out = new Out(incoming.getIncoming().toUpperCase());
@@ -28,7 +28,6 @@ public class HelloApplication {
 		SpringApplication.run(HelloApplication.class, args);
 	}
 }
-
 
 @Data
 @NoArgsConstructor

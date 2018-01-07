@@ -10,10 +10,14 @@ import com.amazonaws.services.apigateway.model.GetRestApisRequest
 import com.amazonaws.services.apigateway.model.TooManyRequestsException
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder
 import com.amazonaws.services.lambda.model.DeleteFunctionRequest
+import org.apache.commons.logging.LogFactory
 import org.junit.Test
 
 
 class AwsDcApplicationTests {
+
+	// this worked
+	// curl -XPOST -d{"incoming": "Hi"} https://vs84ravw45.execute-api.us-east-1.amazonaws.com/prod/uppercase
 
 	val basicAWSCredentials = BasicAWSCredentials(
 			System.getenv("AWS_ACCESS_KEY_ID"), System.getenv("AWS_SECRET_ACCESS_KEY"))
@@ -73,24 +77,29 @@ class AwsDcApplicationTests {
 		deleteRestApis()
 	}
 
+	val log = LogFactory.getLog(AwsDcApplicationTests::class.java)
+
 	@Test
 	fun urlsForRestApi() {
 
-		this.amazonApiGateway
+		val list = this.amazonApiGateway
 				.getRestApis(GetRestApisRequest())
 				.items
 				.flatMap { ri ->
 					this.amazonApiGateway.getResources(GetResourcesRequest().withRestApiId(ri.id)).items
-						.filter { resource ->
-							(resource.resourceMethods ?: emptyMap()).containsKey("GET") && resource.path.contains("hw")
-						}
-						.map {
-							""" https://${ri.id}.execute-api.${region.getName()}.amazonaws.com/prod${it.path} """.trim()
-						}
+							.filter { x ->
+								log.info("${x.path} ${x.id} ${x.pathPart} ${x.resourceMethods}")
+								x.resourceMethods != null && x.pathPart != null
+							}
+							.map {
+								""" https://${ri.id}.execute-api.${region.getName()}.amazonaws.com/prod${it.path} """.trim()
+							}
 				}
-				.forEach { resource ->
-					println(resource)
-				}
+
+
+		list.forEach { resource ->
+			println(resource)
+		}
 	}
 
 }
