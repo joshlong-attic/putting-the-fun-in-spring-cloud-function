@@ -5,7 +5,7 @@ mvn -DskipTests=true clean package
 ## REFERENCES
 ## https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-custom-integrations.html
 
-FUNCTION_NAME=d5  # ${RANDOM}
+FUNCTION_NAME=d6  # ${RANDOM}
 METHOD=ANY
 JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
@@ -42,23 +42,29 @@ METHOD_RESPONSE_RESULT=$( aws apigateway put-method-response --rest-api-id $REST
 INTEGRATION_URI=arn:aws:apigateway:${REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${REGION}:${AWS_ACCOUNT_ID}:function:${FUNCTION_NAME}/invocations
 ROLE_ID=arn:aws:iam::960598786046:role/lambda-role
 
-aws apigateway put-integration \
-    --region ${REGION} \
-    --rest-api-id ${REST_API_ID} \
-    --resource-id ${RESOURCE_ID} \
-    --http-method ${METHOD} \
-    --type AWS \
-    --integration-http-method POST \
-    --uri ${INTEGRATION_URI} \
-    --request-templates file://`pwd`/request-template.json \
-    --credentials $ROLE_ID
+PUT_INTEGRATION_RESULT=$(
+    aws apigateway put-integration \
+        --region ${REGION} \
+        --rest-api-id ${REST_API_ID} \
+        --resource-id ${RESOURCE_ID} \
+        --http-method ${METHOD} \
+        --type AWS \
+        --integration-http-method POST \
+        --uri ${INTEGRATION_URI} \
+        --request-templates file://`pwd`/request-template.json \
+        --credentials $ROLE_ID
+)
 
-aws apigateway put-integration-response \
-    --region ${REGION} \
-    --rest-api-id ${REST_API_ID} \
-    --resource-id ${RESOURCE_ID} \
-    --http-method ANY \
-    --status-code 200 \
-    --selection-pattern ""
+PUT_INTEGRATION_RESPONSE_RESULT=$(
+    aws apigateway put-integration-response \
+        --region ${REGION} \
+        --rest-api-id ${REST_API_ID} \
+        --resource-id ${RESOURCE_ID} \
+        --http-method ANY \
+        --status-code 200 \
+        --selection-pattern ""
+)
 
-aws apigateway create-deployment --rest-api-id ${REST_API_ID} --stage-name prod --region $REGION
+DEPLOY=$( aws apigateway create-deployment --rest-api-id ${REST_API_ID} --stage-name prod --region ${REGION} )
+
+echo Finished deployment.
