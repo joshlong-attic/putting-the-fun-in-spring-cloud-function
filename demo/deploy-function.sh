@@ -71,4 +71,3 @@ PUT_INTEGRATION_RESPONSE_RESULT=$(
 DEPLOY=$( aws apigateway create-deployment --rest-api-id ${REST_API_ID} --stage-name prod --region ${REGION} )
 
 echo https://${REST_API_ID}.execute-api.${REGION}.amazonaws.com/prod${PATH_PART}
-
