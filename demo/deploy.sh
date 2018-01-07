@@ -1,15 +1,15 @@
 #!/bin/bash
 
-mvn -DskipTests=true clean package
+#mvn -DskipTests=true clean package
 
 ## REFERENCES
 ## https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https-example-configure-event-source.html
 ## https://docs.aws.amazon.com/cli/latest/reference/lambda/index.html
 
-METHOD=GET
+METHOD=ANY
 JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
-FUNCTION_NAME=hw
+FUNCTION_NAME=nghw
 ENDPOINT_PATH_PART=${FUNCTION_NAME}
 REGION=us-east-1
 REST_API_NAME=${FUNCTION_NAME}-apigateway
@@ -35,33 +35,36 @@ FUNCTION_ARN=$(
 # 3.0 create the API gateway itself.
 
 ## cleanup
-existing_rest_apis=`aws apigateway get-rest-apis --region $REGION `
-echo $existing_rest_apis  | grep $REST_API_NAME && $(
-    aws apigateway get-rest-apis --region $REGION | jq -r '.items[].id' | while read RID ; do
-     aws apigateway delete-rest-api --region $REGION --rest-api-id $RID || echo "can't delete $RID ";
-    done
-)
+#existing_rest_apis=`aws apigateway get-rest-apis --region $REGION `
+#echo $existing_rest_apis  | grep $REST_API_NAME && $(
+#    aws apigateway get-rest-apis --region $REGION | jq -r '.items[].id' | while read RID ; do
+#     aws apigateway delete-rest-api --region $REGION --rest-api-id $RID || echo "can't delete $RID ";
+#    done
+#)
 
 
 REST_API_ID=$( aws apigateway create-rest-api --name ${REST_API_NAME} --region ${REGION} )
 REST_API_ID=$( echo $REST_API_ID | jq -r '.id' )
 
 
+
 # 3.1 Now we're defining the surface of the API gateway. Create the root resource.
 
-RESOURCE_ROOT_ID=$( aws apigateway get-resources --rest-api-id $REST_API_ID --region ${REGION} )
-RESOURCE_ROOT_ID=$( echo ${RESOURCE_ROOT_ID} | jq -r '.items[].id'   )
+RESOURCE_ID=$( aws apigateway get-resources --rest-api-id $REST_API_ID --region ${REGION} )
+RESOURCE_ID=$( echo $RESOURCE_ID  | jq -r '.items[].id' )
 
 
-# 3.2 Create the path for the resource.
 
-RESOURCE_ID=$( aws apigateway create-resource  --rest-api-id ${REST_API_ID} --parent-id ${RESOURCE_ROOT_ID}  --path-part ${ENDPOINT_PATH_PART} --region ${REGION} )
-RESOURCE_ID=$( echo ${RESOURCE_ID} |  jq -r '.id' )
+#
+## 3.2 Create the path for the resource.
+#
+#RESOURCE_ID=$( aws apigateway create-resource  --rest-api-id ${REST_API_ID} --parent-id ${RESOURCE_ROOT_ID}  --path-part ${ENDPOINT_PATH_PART} --region ${REGION} )
+#RESOURCE_ID=$( echo ${RESOURCE_ID} |  jq -r '.id' )
 
 
 # 3.3 Add the method GET to the resource.
 
-aws apigateway put-method --rest-api-id ${REST_API_ID} --resource-id ${RESOURCE_ID} --http-method $METHOD --authorization-type NONE --region ${REGION}
+#aws apigateway put-method --rest-api-id ${REST_API_ID} --resource-id ${RESOURCE_ID} --http-method $METHOD --authorization-type NONE --region ${REGION}
 
 
 # 3.4 set the lambda function as the destination for the POST method
@@ -93,7 +96,7 @@ aws apigateway put-integration-response \
     --http-method ${METHOD} \
     --region ${REGION} \
     --status-code 200 \
-    --response-templates "{\"application/json\": \"\"}"
+    --response-templates "{\"application/json\": \"\" }"
 
 
 # 3.5 deploy the API

@@ -3,20 +3,24 @@ package example;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.util.function.Function;
 
+@Log
 @SpringBootApplication
 public class HelloApplication {
 
 	@Bean
-	public Function<In, Out> function () {
+	public Function<In, Out> function() {
 		return incoming -> {
-			System.out.println("INCOMING: " + incoming.getIncoming());
-			return new Out(incoming.getIncoming().toUpperCase());
+			log.info("incoming request payload: " + incoming.getIncoming());
+			Out out = new Out(incoming.getIncoming().toUpperCase());
+			log.info("outgoing response payload: " + out.getOutgoing());
+			return out;
 		};
 	}
 
@@ -25,17 +29,17 @@ public class HelloApplication {
 	}
 }
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 class In {
-
 	private String incoming;
 }
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 class Out {
 	private String outgoing;
 }
