@@ -15,12 +15,8 @@ import org.assertj.core.api.Assertions
 import org.junit.Ignore
 import org.junit.Test
 
-
 class AwsDcApplicationTests {
 
-	// curl -XPOST -d{"incoming": "Hi"} https://vs84ravw45.execute-api.us-east-1.amazonaws.com/prod/uppercase
-
-	// this worked
 	val log = LogFactory.getLog(AwsDcApplicationTests::class.java)
 
 	val basicAWSCredentials = BasicAWSCredentials(
