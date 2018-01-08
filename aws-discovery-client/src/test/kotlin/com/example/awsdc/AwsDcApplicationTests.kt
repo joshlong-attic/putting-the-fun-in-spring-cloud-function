@@ -14,6 +14,10 @@ import org.apache.commons.logging.LogFactory
 import org.assertj.core.api.Assertions
 import org.junit.Ignore
 import org.junit.Test
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.cloud.client.discovery.DiscoveryClient
+import org.springframework.stereotype.Component
 
 class AwsDcApplicationTests {
 
@@ -89,6 +93,20 @@ class AwsDcApplicationTests {
 		val url = this.urlByFunctionName("uppercase")
 		println("the function URI is:\n $url ")
 	}
+
+	class DCRunner(val dcs: DiscoveryClient) : ApplicationRunner {
+
+		override fun run(args: ApplicationArguments?) {
+			val uppercaseInstances = dcs.getInstances("uppercase")
+			println("the description is ${dcs.description()}")
+			println("there are ${uppercaseInstances.size} uppercase function instances")
+			uppercaseInstances.forEach {
+				println("\tURL is ${it.uri}")
+			}
+		}
+	}
+
+
 
 	@Test
 	@Ignore
