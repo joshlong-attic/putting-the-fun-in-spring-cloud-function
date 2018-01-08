@@ -41,6 +41,7 @@ RESOURCE_ID=$( echo  $CREATE_RESOURCE_RESULT | jq -r '.id' )
 METHOD_RESULT=$( aws apigateway put-method --rest-api-id $REST_API_ID  --region $REGION  --resource-id $RESOURCE_ID --http-method $METHOD --authorization-type "NONE" )
 METHOD_RESPONSE_RESULT=$( aws apigateway put-method-response --rest-api-id $REST_API_ID --region $REGION --resource-id $RESOURCE_ID  --http-method $METHOD --status-code 200 )
 
+
 INTEGRATION_URI=arn:aws:apigateway:${REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${REGION}:${AWS_ACCOUNT_ID}:function:${FUNCTION_NAME}/invocations
 
 ROLE_ID=arn:aws:iam::960598786046:role/lambda-role

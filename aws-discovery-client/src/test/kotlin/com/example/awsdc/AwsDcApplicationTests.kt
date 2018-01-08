@@ -9,6 +9,7 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder
 import com.amazonaws.services.lambda.invoke.LambdaFunction
 import com.amazonaws.services.lambda.invoke.LambdaInvokerFactory
 import com.amazonaws.services.lambda.model.DeleteFunctionRequest
+import com.amazonaws.services.lambda.model.GetFunctionRequest
 import org.apache.commons.logging.LogFactory
 import org.assertj.core.api.Assertions
 import org.junit.Ignore
@@ -40,6 +41,58 @@ class AwsDcApplicationTests {
 			.withRegion(region)
 			.withCredentials(credentialsProvider)
 			.build()
+
+	fun urlByFunctionName(functionName: String): String? {
+
+		data class PathContext(val resource: Resource,
+		                       val integrationResult: GetIntegrationResult,
+		                       val restApi: RestApi)
+
+
+		val fnArn = amazonLambda.getFunction(GetFunctionRequest()
+				.withFunctionName(functionName))
+				.configuration
+				.functionArn
+
+		return amazonApiGateway.getRestApis(GetRestApisRequest())
+				.items
+				.flatMap { restApi ->
+					amazonApiGateway.getResources(GetResourcesRequest().withRestApiId(restApi.id))
+							.items
+							.flatMap { resource ->
+								val resourceId = resource.id
+								val integration: GetIntegrationResult? =
+										try {
+											val integrationRequest = GetIntegrationRequest()
+													.withHttpMethod("ANY")
+													.withRestApiId(restApi.id)
+													.withResourceId(resourceId)
+
+											amazonApiGateway.getIntegration(integrationRequest)
+										} catch (e: Exception) {
+											null
+										}
+
+								if (null == integration)
+									emptyList()
+								else
+									listOf(PathContext(resource, integration, restApi))
+							}
+				}
+				.map { ctx ->
+					if (ctx.integrationResult.uri.contains(fnArn)) {
+						"https://${ctx.restApi.id}.execute-api.${region.getName()}.amazonaws.com/prod/${ctx.resource.pathPart}"
+					} else
+						null
+				}
+				.first { it != null }
+	}
+
+	@Test
+	fun urlByFunctionName() {
+		val url = this.urlByFunctionName("uppercase")
+		println("the function URI is:\n $url ")
+	}
 
 	@Test
 	@Ignore
