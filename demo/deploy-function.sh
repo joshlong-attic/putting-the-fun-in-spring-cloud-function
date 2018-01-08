@@ -13,7 +13,7 @@ JAR_NAME=./target/demo-1.0.0.BUILD-SNAPSHOT-aws.jar
 HANDLER_NAME=example.HelloHandler
 ENDPOINT_PATH_PART=${FUNCTION_NAME}
 REGION=us-east-1
-REST_API_NAME=${FUNCTION_NAME}-apigateway
+REST_API_NAME=${FUNCTION_NAME}
 FUNCTION_ROLE=arn:aws:iam::${AWS_ACCOUNT_ID}:role/lambda-role
 
 FUNCTION_ARN=$(

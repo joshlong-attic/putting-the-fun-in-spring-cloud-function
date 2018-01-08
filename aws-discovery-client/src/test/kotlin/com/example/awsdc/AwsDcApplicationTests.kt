@@ -4,20 +4,23 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.apigateway.AmazonApiGatewayClientBuilder
-import com.amazonaws.services.apigateway.model.DeleteRestApiRequest
-import com.amazonaws.services.apigateway.model.GetResourcesRequest
-import com.amazonaws.services.apigateway.model.GetRestApisRequest
-import com.amazonaws.services.apigateway.model.TooManyRequestsException
+import com.amazonaws.services.apigateway.model.*
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder
+import com.amazonaws.services.lambda.invoke.LambdaFunction
+import com.amazonaws.services.lambda.invoke.LambdaInvokerFactory
 import com.amazonaws.services.lambda.model.DeleteFunctionRequest
 import org.apache.commons.logging.LogFactory
+import org.assertj.core.api.Assertions
+import org.junit.Ignore
 import org.junit.Test
 
 
 class AwsDcApplicationTests {
 
-	// this worked
 	// curl -XPOST -d{"incoming": "Hi"} https://vs84ravw45.execute-api.us-east-1.amazonaws.com/prod/uppercase
+
+	// this worked
+	val log = LogFactory.getLog(AwsDcApplicationTests::class.java)
 
 	val basicAWSCredentials = BasicAWSCredentials(
 			System.getenv("AWS_ACCESS_KEY_ID"), System.getenv("AWS_SECRET_ACCESS_KEY"))
@@ -39,6 +42,7 @@ class AwsDcApplicationTests {
 			.build()
 
 	@Test
+	@Ignore
 	fun cleanup() {
 
 		fun deleteFunctions() {
@@ -77,29 +81,51 @@ class AwsDcApplicationTests {
 		deleteRestApis()
 	}
 
-	val log = LogFactory.getLog(AwsDcApplicationTests::class.java)
+
+	fun restApiUrl(restApiId: String): String =
+			this.amazonApiGateway.getRestApis(GetRestApisRequest()).items
+					.filter {
+						it.name == restApiId
+					}
+					.map {
+						this.amazonApiGateway.getRestApi(GetRestApiRequest().withRestApiId(it.id))
+					}
+					.flatMap { restApiResult ->
+						this.amazonApiGateway.getResources(GetResourcesRequest().withRestApiId(restApiResult.id)).items
+								.filter { x ->
+									println("rest api id: ${restApiResult.id} ${restApiResult.name}")
+									log.info("${x.path} ${x.id} ${x.pathPart} ${x.resourceMethods}")
+									x.resourceMethods != null && x.pathPart != null
+								}
+								.map {
+									""" https://${restApiResult.id}.execute-api.${region.getName()}.amazonaws.com/prod${it.path} """.trim()
+								}
+					}
+					.first()
+
 
 	@Test
-	fun urlsForRestApi() {
-
-		val list = this.amazonApiGateway
-				.getRestApis(GetRestApisRequest())
-				.items
-				.flatMap { ri ->
-					this.amazonApiGateway.getResources(GetResourcesRequest().withRestApiId(ri.id)).items
-							.filter { x ->
-								log.info("${x.path} ${x.id} ${x.pathPart} ${x.resourceMethods}")
-								x.resourceMethods != null && x.pathPart != null
-							}
-							.map {
-								""" https://${ri.id}.execute-api.${region.getName()}.amazonaws.com/prod${it.path} """.trim()
-							}
-				}
-
-
-		list.forEach { resource ->
-			println(resource)
-		}
+	fun testRestApi() {
+		val url = restApiUrl("uppercase")
+		println("the URL is ${url}")
 	}
 
+	interface UppercaseService {
+
+		@LambdaFunction
+		fun uppercase(request: UppercaseRequest): UppercaseResponse
+	}
+
+	data class UppercaseRequest(var incoming: String? = null)
+	data class UppercaseResponse(var outgoing: String? = null)
+
+	@Test
+	fun invokeFunction() {
+		val uppercaseService = LambdaInvokerFactory
+				.builder()
+				.lambdaClient(this.amazonLambda)
+				.build(UppercaseService::class.java)
+		val message = uppercaseService.uppercase(UppercaseRequest(incoming = "hello"))
+		Assertions.assertThat(message.outgoing).isEqualTo("hello".toUpperCase())
+	}
 }
