@@ -32,8 +32,9 @@ class AwsAutoConfiguration(val env: Environment) {
 
 	@Bean
 	@ConditionalOnMissingBean
-	fun awsCredentialsProvider() = AWSStaticCredentialsProvider(BasicAWSCredentials(env.getProperty("cloud.aws.credentials.accessKey", System.getenv("AWS_ACCESS_KEY_ID")),
-			env.getProperty("cloud.aws.credentials.secretKey", System.getenv("AWS_SECRET_ACCESS_KEY"))))
+	fun awsCredentialsProvider() = AWSStaticCredentialsProvider(
+			BasicAWSCredentials(env.getProperty("cloud.aws.credentials.accessKey", System.getenv("AWS_ACCESS_KEY_ID")),
+					env.getProperty("cloud.aws.credentials.secretKey", System.getenv("AWS_SECRET_ACCESS_KEY"))))
 
 	@Bean
 	@ConditionalOnMissingBean
