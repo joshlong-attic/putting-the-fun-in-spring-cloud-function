@@ -19,9 +19,9 @@ import java.net.URI
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  *
  */
-class LambdaDiscoveryClient(val region: Regions,
-                            val amazonApiGateway: AmazonApiGateway,
-                            val lambda: AWSLambda) : DiscoveryClient {
+class LambdaDiscoveryClient(private val region: Regions,
+                            private val amazonApiGateway: AmazonApiGateway,
+                            private val lambda: AWSLambda) : DiscoveryClient {
 
 	override fun getServices(): MutableList<String> =
 			lambda
@@ -33,7 +33,9 @@ class LambdaDiscoveryClient(val region: Regions,
 	override fun getInstances(serviceId: String): MutableList<ServiceInstance> =
 			mutableListOf(SimpleDiscoveryProperties.SimpleServiceInstance(URI.create(urlByFunctionName(serviceId))))
 
-	override fun description(): String = "A discovery client that returns URIs for AWS Lambda functions mapped to API Gateway endpoints ".trim()
+	override fun description(): String = ("A discovery client that returns URIs " +
+			"for AWS Lambda functions mapped to API Gateway endpoints")
+			.trim()
 
 	private fun urlByFunctionName(functionName: String): String? {
 
@@ -76,8 +78,7 @@ class LambdaDiscoveryClient(val region: Regions,
 				.map { ctx ->
 					if (ctx.integrationResult.uri.contains(fnArn)) {
 						"https://${ctx.restApi.id}.execute-api.${region.getName()}.amazonaws.com/prod/${ctx.resource.pathPart}"
-					}
-					else
+					} else
 						null
 				}
 				.first { it != null }

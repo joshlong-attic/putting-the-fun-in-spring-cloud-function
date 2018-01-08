@@ -17,7 +17,7 @@ import org.springframework.core.env.Environment
 @Configuration
 class AwsAutoConfiguration(val env: Environment) {
 
-	val region = Regions.valueOf(env.getProperty("cloud.aws.region", Regions.US_EAST_1.name))
+	private val region = Regions.valueOf(env.getProperty("cloud.aws.region", Regions.US_EAST_1.name))
 
 	@Bean
 	@ConditionalOnMissingBean
