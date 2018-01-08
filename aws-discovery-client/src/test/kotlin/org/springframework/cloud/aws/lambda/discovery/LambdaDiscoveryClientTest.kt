@@ -28,7 +28,7 @@ class LambdaDiscoveryClientTest {
 	fun getInstances() {
 		val dc = ldc!!
 		dc.getInstances("uppercase").forEach {
-			println("found: $it.uri}")
+			println("found: ${it.uri}")
 		}
 	}
 
