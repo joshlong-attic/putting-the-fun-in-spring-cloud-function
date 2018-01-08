@@ -1,4 +1,4 @@
-package com.example.awsdc
+package org.springframework.cloud.aws.lambda.discovery
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
@@ -14,14 +14,10 @@ import org.apache.commons.logging.LogFactory
 import org.assertj.core.api.Assertions
 import org.junit.Ignore
 import org.junit.Test
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
-import org.springframework.cloud.client.discovery.DiscoveryClient
-import org.springframework.stereotype.Component
 
-class AwsDcApplicationTests {
+class AwsApiGatewayScratchTests {
 
-	val log = LogFactory.getLog(AwsDcApplicationTests::class.java)
+	val log = LogFactory.getLog(AwsApiGatewayScratchTests::class.java)
 
 	val basicAWSCredentials = BasicAWSCredentials(
 			System.getenv("AWS_ACCESS_KEY_ID"), System.getenv("AWS_SECRET_ACCESS_KEY"))
@@ -93,20 +89,6 @@ class AwsDcApplicationTests {
 		val url = this.urlByFunctionName("uppercase")
 		println("the function URI is:\n $url ")
 	}
-
-	class DCRunner(val dcs: DiscoveryClient) : ApplicationRunner {
-
-		override fun run(args: ApplicationArguments?) {
-			val uppercaseInstances = dcs.getInstances("uppercase")
-			println("the description is ${dcs.description()}")
-			println("there are ${uppercaseInstances.size} uppercase function instances")
-			uppercaseInstances.forEach {
-				println("\tURL is ${it.uri}")
-			}
-		}
-	}
-
-
 
 	@Test
 	@Ignore
